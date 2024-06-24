@@ -1,0 +1,80 @@
+cv = 5
+Fitting 5 folds for each of 96 candidates, totalling 480 fits
+Best parameters found: {'colsample_bytree': 0.7, 'learning_rate': 0.01, 'max_depth': 3, 'n_estimators': 100}
+mse with tuned parameters: 0.3544
+
+cv = 3
+Fitting 3 folds for each of 96 candidates, totalling 288 fits
+Best parameters found: {'colsample_bytree': 0.7, 'learning_rate': 0.01, 'max_depth': 3, 'n_estimators': 100}
+mse with tuned parameters: 0.3544
+
+=======================================================================
+파라미터 현재 있는 요소
+
+param_grid = {
+    'max_depth': [3, 4, 5, 6],           # 과적합 방지를 하기 위해 적당한 값이 필요
+    'learning_rate': [0.01, 0.1, 0.3],   # 기본 값 0.3 값이 낮아질수록 더 약한 학습기가 필요하다
+    'n_estimators': [100, 200, 300, 400],  # 학습기 수 
+    'colsample_bytree': [0.3, 0.7]        # 최대 트리 수 
+
+=======================================================================
+내가 적용한 요소
+
+param_grid = {
+    'learning_rate': [0.01, 0.05, 0.1, 0.3],
+    'max_depth': [3, 5, 7, 10],
+    'n_estimators': [100,200,300,400,500],
+    'subsample': [0.6, 0.8, 1.0],
+    'colsample_bytree': [0.6, 0.8, 1.0],
+    'gamma': [0, 0.1, 0.3],
+    'reg_lambda': [1, 5, 10],
+    'reg_alpha': [0, 1, 5]
+
+-> 시간이 엄청 길어진 이유
+
+gamma / rreg_lamda / reg_alpha 요소를 넣음으로서
+조합수가 엄청 많아져서 원래는 15분 걸리던게 그 이상으로 오래 걸린다
+
+원인 분석
+1. 높은 수의 하이퍼파라미터 조합 (gamma / rreg_lamda / reg_alpha) 기하급수적으로 증가
+2. 복잡한 모델 구조 ( max_depth가 높을 수록 n_estimators가 많을수록 모델이 더 복잡 학습 시간 증가)
+-> 특히 max_depth가 6일 경우 , 각 트리의 깊이가 깊어지면서 학습해야 할 데이터 양 증가
+3. 교차 검증의 폴드 수
+
+
+그럼 시간을 줄이려면 어떻게 해야하는가?
+1. 하이퍼파라미터 수 줄이기 
+2. 조기 종료 사용
+3. 병럴 처리 활성화
+4. 하이퍼파라미터 튜닝 방법 변경 ( 랜덤 서치 / 베이지안 최적화 )
+
+======================================================================
+
+파라미터 요스들을 중요 요소만 남겨두고??
+중요요소라기엔 적용하는 파라미터 요쇼들이 다 중요...
+그럼 어떻게 해결해야하는가....?
+일단은 구글 코랩 gpu를 적용해서 모델 돌려보는 중이지만
+이것또한 시간이 아주 약간 단축되었을 뿐 언제 다 돌아간다는 보장이 없다
+기본 모델에 있는 scoring='neg_mean_squared_error'  -> 이 부분 회귀할 때 주로 쓰인다
+리그오브레전드 승부 예측은 분류를 사용해야하기 때문에  -? 이 부분을 scoring= accuracy 즉 분류 알고리즘을 사용하는 것이 적절
+이에 맞춰 accuracy / f1 score / roc_auc 와 같은 분류 평가 지표를 사용하는것이 좋다
+
+grid 서치 부분 파라미터 추가 하지 않고 요소4개로만 학습완료 
+원래는 회귀알고리즘이였지만 분류알고리즘으로 변환완료 후 학습까지 완료
+
+random서치 부분으로 변환하여 파라미터 요소 전부 다 추가하여 학습 
+학습결과가 grid 서치 요소 추가 하지 않은 값과 동일하게 나왔다
+
+grid서치 부분 파라미터요소 추가 후 대략 7~8시간 정도 걸리것으로 예상
+scoring='neg_mean_squared_error' 이걸 쓰는이유 확률을 나타내야하기 때문에
+피쳐엔지니어링
+
+MAE: neg_mean_absolute_error
+MSE: neg_mean_squared_error
+RMSE: neg_root_mean_squared_error
+MSLE: neg_mean_squared_log_error
+
+
+accuracy 가지고 있는 데이터랑 얼마나 비슷한가를 확인
+그러므로 오늘 학습했던 데이터들은 모두 mse로 바꿔서 학습
+

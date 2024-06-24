@@ -1,0 +1,193 @@
+06.19
+
+make_pivoit_table 파일
+
+.squeeze  = 차원이1인 차원 제거
+.extend = 끝에서부터 채워 넣는다 ( 예를 들어 x = 1,2,3 / x.extend([4,5]) = (1,2,3,4,5)
+-> append와 다른 점 x = 1,2,3, / x.appned([4,5]) => (1,2,3,[4,5])
+.concat = 두 데이터 연결
+esportsPlayerId_type_dict = dict(zip(temp1, temp2)) = zip() 두 리스트의 같은 위치에 있는 요소들을 튜플 형태로 묶는다
+notna () = esportsPlayedId 열이 결측값이 아닌지를 확인
+
+=> pre_make_pivot_tabel_draft 엑셀로 만들어준다
+
+
+=======================================================================
+make.dataset 파일
+
+teamdata_df.columns = [f"{col[1]}_{col[0]}".replace('team', '').replace('__', '_').strip() for col in teamdata_df.columns.values]
+- col이라는 변수에 저장
+- col[1]}_{col[0] = col 두번째와 첫번째 요소를 밑줄로 연결
+- replace(team) 생성된 문자열 team이라는 단어 공백으로되어 있기 떄문에 대체(제거된다고보면 된다)
+- replace('__', '_') = 두 개의 밑줄을 하나의 밑줄로 대체
+- strip() = 양쪽 끝에 있는 공백 문자 제거
+
+- duplicated = 중복행 확인 
+- isinstance = (col, tuple) => col의 tuple형태인지 확인
+ 
+=======================================================================
+make_a_model 파일
+
+cv = 5 (중첩 수 증가)
+joblib.dump((best_model, scaler, X.columns), '../data/model_draft5_2_1.pkl')
+- best_model, scaler, X.columns  가  pkl에 저장
+
+========================================================================
+pkl 파일
+
+model_draft5_2_1 
+- 들어갈 요소 정리
+
+present_data
+- 게임별 승률 / 골드 / 킬 
+- 시간대별 평균 어시 / 데미지 / CS 
+
+=======================================================================
+
+파일 정리 
+
+calculateColumsForModel.py
+- last_row_of_collected_data.xlsx 파일 저장
+- 선수 10명에 대한 킬 데스 어시 따로 기록
+- 데스 0 일때는 1.2배 곱으로 kda 계산
+- kda 기록
+- 시야점수 기록
+- 포지션 별 중간값 저장
+
+crawling_game_infos.py
+- crawling_result_with_codenames.xlsx 파일저장
+- 경기에 대한 이름/ id / slug(대회이름) 표시
+- api에서 나온 토너먼트 네임을 저장
+
+get_avg_of_collected_data
+- average_of_collected_datas.xlsx 파일 저장
+- gameid / esportsId_Blue / esportsId_Red -> Str로 저장
+- last_row_of_collected_datas.xlsx 파일 불러와서 작업
+- col1 + col2 값을 더한 sum 열 추가
+- calculateColumnsForModel 함수를 적용하여 new_df 셍성
+- verbose=True는 모든 열에 대한 상세 정보를 출력합니다.
+- show_counts=True는 각 열의 비어 있지 않은 값의 개수를 출력합니다.
+
+get_dataset_of_present
+- collected_data 로드
+- game_idx.xlsx 로드
+- last_row_of_collected_datas.xlsx 로드
+- id에 널값이 있을 수 있어 notna 적용
+- 최근 1년 경기 기준
+- 선수별 최근 경기 스탯
+- present_data.pkl로 저장
+
+get_game_detail_test
+- flag 별 얻고 싶은 정보 ( flag 0 / flag 1 / flag 2 )
+- 경기별 세부 요소 정보
+- 2시간 동안 10초 단위 데이터수집
+- api로 선수 정보 획득
+- 에러 떴을 때 재시도 
+- game id를 넣고 정보를 보고 있을 때 확인 코드
+- 데이터 수집 ( 오랫동안 했었던 작업했었던 거 데이터 뽑아오는 코드 ) -> collected_data/game_id.xlsx 파일로 저장
+
+get_game_detail
+- 위와 동일 
+- 다른 점은 데이터 수집하는 코드 x
+
+get_predict_data
+- 평균치 적용 
+- 플레이어 스탯
+- model / scaler/ X_columns  (model_draft5.pkl 파일 로드 
+
+getGameids
+- target_tournament_for_test.xlsx 로드
+- api를 통해 가져온다
+- game_ids_for_test.xlsx 저장
+
+make_a_model
+- dataset_draft5_2.xlsx 로드
+- xgboost 모델 적용 실행
+- 이 부분은 내가 조금 공부할 수 있는 부분
+
+make_dataset
+- pre_make_pivot_table_draft5.xlsx 로드
+- 피벗 테이블 만들기
+- /data/dataset_draft5_2.xlsx 저장
+
+make_pivot_table
+- collected_data 로드
+- 위에랑 같은 피벗 테이블  만들기
+- pre_make_pivot_table
+
+match_winside_with_gameids
+- handmade_game_ids_crosschecked.xlsx, game_ids.xlsx, crawling_result_with_codenames.xlsx 파일로드
+- 이긴 팀과 아이디 적용해서
+- game_ids.xlsx 저장
+
+nomalization
+- game_id를 가지고 데이터 확인
+- 모양/ 정보 확인
+
+pick_last_row_of_collected_datas
+- 기록 확인 선수의 게임 한판 목록을 보기 위해서 게임번호 찾아가서 하려니 시간이 오래 걸린다
+- 기록들을 한 곳에 모아
+- last_row_of_collected_datas.xlsx 저장
+
+pickle_test
+- 저장한 pickle파일 로드 확인
+
+pitchernalyze
+- 걷어낼 부분 걷어내고 
+- 팀 / 골드 / 킬에 대한 정보 저장
+
+requestWithHandlingHttperr
+- http정보 가져오기
+- api요청
+- 각각의 에러에 대한 해결 코드
+- 에러에 대한 표시
+
+
+=======================================================================
+
+esportsPlayerId_type_dict = dict(zip(temp1, temp2))
+
+=======================================================================
+
+모델의 성능을 향상 시키기 위한 방법
+1. 데이터 전처리
+- 결측값 처리
+- 데이터 정규화/표준화
+- 특성 엔지니어링
+- 불균형 데이터 처리
+
+2. 모델 선택 맟 하이퍼파라미터 튜닝
+- 단일 모델보다는 앙상블 기법 ( 다양한 알고리즘을 결합하여 더 강력하고 안정적인 모델 만드는 방법)
+- grid / random / bayesign 등을 사용하여 최적의 파라미터 찾기
+
+3. 모델 평가 및 개선
+- 교차검증 ( 모델의 성능을 평가하고, 데이터의 변동성을 줄인다 / cross_val_score 등을 사용에 성능과 분산을 확인
+- 특성 중요도 분석 : 어떤 특성에 의존하는지 분석하여 중요한 특성 강화 / 중요하지 않은 특성 제거
+- 앙상블
+
+4. 학습률 조정
+- 학습률 스케줄링을 사용하여 학습이 진행됨에 따라 학습률 조정
+
+5. 개선
+- 모델 해석 도구 (LIME, SHAP)를 사용하여 모델이 예측을 어떻게 수행하는지 이해하고, 이를 바탕으로 모델 개선
+
+=========================================================================
+
+현재 작업 중인 거 
+
+올라온 모델가지고 
+rf / xgb / lgb 모델 학습
+파라미터 조정 필요 기본 조정으로만 돌려보는 중
+한 코드로 묶어서 돌릴 수 있도록 합쳐서 돌리는 중
+
+에러발생 = error_score
+=> 해결방안 : error_score=raise 옵션 설정 하면 된다 ( 이렇게 설정하면 그 하이퍼파라미터 조합은 학습되지 않고 제외 )
+
+세 개의 모델을 한꺼번에 돌리려고 하니까 오류가 나온다
+각 자의 모델로 분류해서 한 번 돌려봐야겠다
+
+새로 기존 정의된 코드로 세개의 모델을 학습하니 꽤 시간이 빠르다
+여기서 하이퍼파라미터 요소 추가하지 않고 그냥 돌릴 예정
+
+하이퍼 파라미터 조정하면 꽤 많은 시간이 걸려서 어려울 것 같다
+

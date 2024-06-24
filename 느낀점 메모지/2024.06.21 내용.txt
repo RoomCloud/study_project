@@ -1,0 +1,17 @@
+2024.06.21 
+
+ac=0.99  val_acc=0.6
+= 99프로가 나오는데 테스트 데이터로는 60프로 정도 나왔다는 말
+
+model_draft5_7_1.xlxx = I/J열에서 카운트 나누는 기준은 X
+
+컬럼별 표준화
+
+
+
+pick_last_row_of_collected_datas.py
+get_predict_data.py
+get_dataset_of_present.py
+calculateColumnsForModel.py
+apply_test_data_to_model.ipynb
+

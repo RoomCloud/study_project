@@ -1,0 +1,91 @@
+2024.06.12
+
+오늘 진행중
+
+xgboost 하이퍼파라미터 조정 후 데이터 돌려보기
+
+알게된 내용
+1. gird -> 시간이 너무 오래걸린다
+2. random -> 시간이 짧은 대신 변수 컬럼 랜덤
+3.파타미터 설정
+gird search -> 명시적으로 적어주면 된다
+random search -> 범위나 분포로 적어주면 된다
+4. random 서치에서 값을 계속 설정해가며 하고 있는데
+에폭을 늘리고 교차검증수와 종류 시점을 늘리고 데이터를 늘리면 그만큼 시간이 
+오래걸린다-> 하지만 grid 서치보다는 적게 시간이 든다
+5. earlyt_stopping_rounds 와 같은 xgboost의 고유의 파라미터를 직접 지원 x
+그리드 서치나 랜덤서치에서 사용할 때는 약간의 다른 방법이 필요
+- scikit-learn pipeline 과 fit_params 사용
+- 일부 경우에만 제대로 작동할 수 있으며, 복잡한 설정에서는 다소 번거로움
+- 사용자 정의 클래스 사용
+=> 랜덤 서치는 하이퍼 파라미터를 무작위로 샘플링하여 탐색 early_stopping_rounds 직접 사용 가능
+     그리드 서치는 하이퍼 파라미터조합을 평가 early_stopping_rounds를 직접적으로 지원하기 않기 때문에 추가적인 설정 필요
+-> f1 스코어 점수가 높고 roc auc 0.8이상이라면 일반적으로 좋다고 판단
+
+
+기본 적용 모델 
+f1 : 0.7258 
+roc auc : 0.8144
+time : 227.97
+
+n_estimators': randint(300, 500) 모델
+f1 : 0.7258
+roc auc : 0.8144
+time : 236.08
+
+learning_rate': uniform(0.001, 0.1) 낮춘 모델
+f1 : 0.7236
+roc auc : 0.8164
+time : 262.25
+
+n_iter=200
+cv = 5 모델
+f1 : 0.7236
+roc auc : 0.8164
+time : 756.74
+
+early_stopping_rounds = 20 모델
+f1 : 0.7227
+roc auc : 0.8145
+time : 485.83
+
+early_stopping_rounds = 15 모델
+f1 : 0.7248
+roc auc : 0.8148
+time : 699.57
+
+early_stopping_rounds = 12 모델
+f1 : 0.7248
+roc auc : 0.8148
+time : 641.28
+
+early_stopping_rounds = 17 모델
+f1 : 0.7262
+roc auc : 0.8145
+time : 517.71
+
+n_iter=100
+early_stopping_rounds = 20
+f1 : 0.7227
+roc auc : 0.8145
+time : 190.37
+
+'learning_rate': uniform(0.01, 0.1)
+f1 : 0.7275
+roc auc : 0.8149
+time : 156.92
+
+early_stopping_rounds = 10 모델
+f1 : 0.7269
+roc auc : 0.8154
+time : 321.27
+
+
+f1 score : 정밀도 
+accuracy : 정확도
+ROC AUC 
+ ROC curve는 어떤 모델(classifier)이 좋은 성능을 보이는지 판단할 때 사용할 수 있다
+- auc : 아래 면적
+- roc : fpr/tpr -> receiver operating characteristic 임계값에 따른 fpr-tpr curve
+tpr : 올바르게 예측한 비율
+fpr : 잘못 예측한 비율
